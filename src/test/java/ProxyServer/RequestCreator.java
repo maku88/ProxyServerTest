@@ -30,6 +30,7 @@ import java.util.List;
 public class RequestCreator {
     private static String host = "http://morrigan.mobi-id.pl:8080/rest/api/request/logs";
     private static String pingHost ="http://morrigan.mobi-id.pl:8080/rest/open/ping";
+    private static String nuadaHost = "http://smarttouch.mobi-id.pl/rest/open/ping";
     private static String login = "maku17@gmail.com";
     private static String token = "7qvmmpuv8jh4i0p259kmclc4pj";
     private static String dateTo = "2013-05-16";
@@ -38,15 +39,15 @@ public class RequestCreator {
 
     @Test
     public void getPing() {
-        System.setProperty("http.proxySet", "true");
+//        System.setProperty("http.proxySet", "true");
         System.setProperty("http.proxyHost", "localhost");
         System.setProperty("http.proxyPort", "10000");
 //        System.setProperty("http.proxyType", "4");
 
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
-        WebResource webResource = client.resource(pingHost);
-
+        client.setReadTimeout(10000);
+        WebResource webResource = client.resource(nuadaHost);
 
         ClientResponse response = webResource.get(ClientResponse.class);
 
@@ -65,11 +66,12 @@ public class RequestCreator {
 
         try{
 
-        URL url = new URL(pingHost);
+        URL url = new URL(nuadaHost);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setDoOutput(true);
+//        conn.setDoOutput(true);
 //        conn.setRequestMethod("POST");
 //        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
 
         BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
 
