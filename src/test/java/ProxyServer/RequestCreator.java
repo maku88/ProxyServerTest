@@ -66,8 +66,8 @@ public class RequestCreator {
 
         try{
 
-        URL url = new URL(nuadaHost);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+          URL url = new URL(nuadaHost);
+          HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 //        conn.setDoOutput(true);
 //        conn.setRequestMethod("POST");
 //        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -127,8 +127,11 @@ public class RequestCreator {
     }
 
 
-    private static String javaStyle() {
+    @Test
+    public void javaStyle() {
         try {
+            System.setProperty("http.proxyHost", "localhost");
+            System.setProperty("http.proxyPort", "10000");
 
             URL url = new URL(host);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -143,6 +146,8 @@ public class RequestCreator {
             }
 
             String input = "login="+login+"&token="+token+"&dateFrom="+dateFrom+"&dateTo="+dateTo+colString;
+
+            System.out.println(input);
 
             OutputStream os = conn.getOutputStream();
             os.write(input.getBytes());
@@ -168,7 +173,7 @@ public class RequestCreator {
 
         }
 
-        return null;
+
     }
 
 

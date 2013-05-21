@@ -1,12 +1,12 @@
 package ProxyServer;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
+import ProxyServer.methods.GetRequest;
+import ProxyServer.methods.PostRequest;
+import ProxyServer.methods.IRequest;
+import ProxyServer.request.Request;
+import ProxyServer.request.RequestHeader;
+import org.apache.commons.io.IOUtils;
 
-import javax.ws.rs.core.MediaType;
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -26,164 +26,69 @@ public class ProxyThread extends Thread {
     }
 
     public void run() {
-        //get input from user
-        //send request to server
-        //get response from server
-        //send response to user
-
         try {
-//            DataOutputStream out =new DataOutputStream(socket.getOutputStream());
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            String inputLine, outputLine;
-            String request ="";
-            int cnt = 0;
-            String urlToCall = "";
+            Map<String, String> headerMap = new HashMap<String, String>();
+            PrintWriter out = new PrintWriter(socket.getOutputStream());
+//            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            InputStream in = socket.getInputStream();
+
             ///////////////////////////////////
             //begin get request from client
-            while ((inputLine = in.readLine()) != null) {
-                try {
-                    StringTokenizer tok = new StringTokenizer(inputLine);
-                    tok.nextToken();
-                } catch (Exception e) {
-                    break;
-                }
 
-                request+= inputLine;
+//            Header[] header = HttpParser.parseHeaders(socket.getInputStream(),"UTF-8");
+//            for(Header h : header ) {
+//                System.out.println(h.getName() + " : " + h.getValue());
+//            }
 
 
 
-                //parse the first line of the request to find the url
-                if (cnt == 0) {
-                    String[] tokens = inputLine.split(" ");
-                    urlToCall = tokens[1];
-                    //can redirect this to output log
-                    System.out.println("Request for : " + urlToCall);
-                }
-
-                cnt++;
-            }
-
-            System.out.println("----------------------------");
-            System.out.println(request);
-            System.out.println("----------------------------");
-            //end get request from client
-            ///////////////////////////////////
-
-            BufferedReader rd = null;
+            Request requestFromClient = readRequest(in);
+            System.out.println("REQUEST FROM CLIENT : " + requestFromClient.toString());
             try {
                 //begin send request to server, get response from server
+//                ClientConfig config = new DefaultClientConfig();
+//                Client client = Client.create(config);
+//                WebResource webResource = client.resource(urlToCall);
+//
+//                ClientResponse response = webResource.get(ClientResponse.class);
+//                System.out.println("Output from Server .... \n");
+//                String output = response.getEntity(String.class);
+//                System.out.println(output);
 
-                ClientConfig config = new DefaultClientConfig();
-                Client client = Client.create(config);
-                WebResource webResource = client.resource(urlToCall);
+                IRequest requestHandelr;
 
-                ClientResponse response = webResource.get(ClientResponse.class);
-                System.out.println("Output from Server .... \n");
-                String output = response.getEntity(String.class);
-                System.out.println(output);
+                switch (requestFromClient.getHeader().getMethod()) {
+                    case GET:
+                        requestHandelr = new GetRequest();
+                        break;
+                    case POST:
+                        requestHandelr = new PostRequest();
+                        break;
+                    default:
+                        requestHandelr = new GetRequest();
+                }
 
-                PrintWriter out = new PrintWriter(socket.getOutputStream());
+                String output = requestHandelr.makeRequest(requestFromClient);
 
                 // Start sending our reply, using the HTTP 1.1 protocol
                 out.print("HTTP/1.1 200 \r\n"); // Version & status code
                 out.print("Content-Type: text/plain\r\n"); // The type of data
                 out.print("Connection: close\r\n"); // Will close stream
                 out.print("\r\n"); // End of headers
-
-                // Now, read the HTTP request from the client, and send it
-                // right back to the client as part of the body of our
-                // response. The client doesn't disconnect, so we never get
-                // an EOF. It does sends an empty line at the end of the
-                // headers, though. So when we see the empty line, we stop
-                // reading. This means we don't mirror the contents of POST
-                // requests, for example. Note that the readLine() method
-                // works with Unix, Windows, and Mac line terminators.
-//                String line;
-//                while ((line = in.readLine()) != null) {
-//                    if (line.length() == 0)
-//                        break;
-//                    out.print(line + "\r\n");
-//                }
-
                 out.write(output);
 
-                // Close socket, breaking the connection to the client, and
-                // closing the input and output streams
                 out.close(); // Flush and close the output stream
 
-
-
-
-
-
-
-//                URL url = new URL(urlToCall);
-//                URLConnection conn = url.openConnection();
-//                conn.setDoInput(true);
-//                not doing HTTP posts
-//                conn.setDoOutput(true);
-//                System.out.println("content length: "
-//                + conn.getContentLength());
-//                System.out.println("allowed user interaction: "
-//                + conn.getAllowUserInteraction());
-//                System.out.println("content encoding: "
-//                + conn.getContentEncoding());
-//                System.out.println("content type: "
-//                + conn.getContentType());
-//
-                // Get the response
-//                InputStream is = null;
-//                HttpURLConnection huc = (HttpURLConnection)conn;
-//
-//                if (conn.getContentLength() > 0) {
-//                    try {
-//                        is = conn.getInputStream();
-//                        rd = new BufferedReader(new InputStreamReader(is));
-//                    } catch (IOException ioe) {
-//                        System.out.println(
-//                                "********* IO EXCEPTION **********: " + ioe);
-//                    }
-//                }
-                //end send request to server, get response from server
-                ///////////////////////////////////
-
-                ///////////////////////////////////
-
-//                begin send response to client
-//                byte by[] = new byte[ BUFFER_SIZE ];
-//                int index = is.read( by, 0, BUFFER_SIZE );
-//                while ( index != -1 )
-//                {
-//                    out.write( by, 0, index );
-//                    index = is.read( by, 0, BUFFER_SIZE );
-//                }
-
-//                socket.getOutputStream().write(output.getBytes());
-//                out.write(output.getBytes());
-//                System.out.println(socket.isClosed());
-//
-//                out.flush();
-
-
-                //end send response to client
-                ///////////////////////////////////
             } catch (Exception e) {
-                //can redirect this to error log
                 System.err.println("Encountered exception: " + e);
                 e.printStackTrace();
-                //encountered error - just send nothing back, so
-                //processing can continue
-//                out.writeBytes("");
             }
 
-            //close out all resources
-            if (rd != null) {
-                rd.close();
+
+            if (out != null) {
+                out.close();
             }
-//            if (out != null) {
-//                out.close();
-//            }
             if (in != null) {
                 in.close();
             }
@@ -195,4 +100,63 @@ public class ProxyThread extends Thread {
             e.printStackTrace();
         }
     }
+
+
+    private Request readRequest(InputStream in) throws IOException {
+        Request requestFromClient = new Request();
+        String inputLine = "", outputLine;
+        int cnt = 0;
+        String urlToCall = "";
+        RequestHeader header =  new RequestHeader();
+
+
+
+//        System.out.println(new String(chars));
+//
+        byte[] buffer = new byte[8192];
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        int bytesRead;
+        while ((bytesRead = in.read(buffer)) != -1)
+        {
+            output.write(buffer, 0, bytesRead);
+        }
+
+        System.out.println(output.toString());
+
+//        while (((inputLine = in.readLine()) != null) && (!(inputLine.equals("")))) {
+//            try {
+//                StringTokenizer tok = new StringTokenizer(inputLine);
+//                tok.nextToken();
+//            } catch (Exception e) {
+//                break;
+//            }
+//
+//            System.out.println(inputLine);
+//
+////            parse the first line of the request to find the url
+//            String[] tokens = inputLine.split(" ");
+//            if (cnt == 0) {
+//
+//                urlToCall = tokens[1];
+////                can redirect this to output log
+//                System.out.println("IRequest for : " + urlToCall);
+//                header.setMethod(RequestHeader.Method.valueOf(tokens[0]));
+//                header.setUrl(tokens[1]);
+//                header.setHttpVersion(tokens[2]);
+//            }else if(cnt == 1 ) {
+//
+//
+//            }else if(cnt == 2) {
+//                header.setHost(tokens[1]);
+//            }
+//
+//            cnt++;
+//        }
+        requestFromClient.setHeader(header);
+        requestFromClient.setBody("");
+
+        return requestFromClient;
+
+    }
+
 }
