@@ -28,9 +28,11 @@ public class ProxyThread extends Thread {
     public void run() {
         try {
 
+            System.out.println("id : " +this.getId());
+
             Map<String, String> headerMap = new HashMap<String, String>();
             PrintWriter out = new PrintWriter(socket.getOutputStream());
-//            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
             InputStream in = socket.getInputStream();
 
             ///////////////////////////////////
@@ -113,17 +115,18 @@ public class ProxyThread extends Thread {
 
 //        System.out.println(new String(chars));
 //
-        byte[] buffer = new byte[8192];
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        int bytesRead;
-        while ((bytesRead = in.read(buffer)) != -1)
-        {
-            output.write(buffer, 0, bytesRead);
-        }
+//        byte[] buffer = new byte[8192];
+//        ByteArrayOutputStream output = new ByteArrayOutputStream();
+//        int bytesRead;
+//        while ((bytesRead = in.read(buffer)) != -1)
+//        {
+//            output.write(buffer, 0, bytesRead);
+//        }
+//
+//        System.out.println(output.toString());
 
-        System.out.println(output.toString());
-
-//        while (((inputLine = in.readLine()) != null) && (!(inputLine.equals("")))) {
+//        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+//        while (((inputLine = input.readLine()) != null) && (!(inputLine.equals("")))) {
 //            try {
 //                StringTokenizer tok = new StringTokenizer(inputLine);
 //                tok.nextToken();
@@ -132,13 +135,12 @@ public class ProxyThread extends Thread {
 //            }
 //
 //            System.out.println(inputLine);
-//
-////            parse the first line of the request to find the url
+//            parse the first line of the request to find the url
 //            String[] tokens = inputLine.split(" ");
 //            if (cnt == 0) {
 //
 //                urlToCall = tokens[1];
-////                can redirect this to output log
+//                can redirect this to output log
 //                System.out.println("IRequest for : " + urlToCall);
 //                header.setMethod(RequestHeader.Method.valueOf(tokens[0]));
 //                header.setUrl(tokens[1]);
@@ -150,8 +152,26 @@ public class ProxyThread extends Thread {
 //                header.setHost(tokens[1]);
 //            }
 //
+//            if(inputLine.contains("Content-Length:") ) {
+//                header.setContentLength(Integer.parseInt(tokens[1]));
+//            }
+//
+//
 //            cnt++;
 //        }
+
+        byte[] bytes = new byte[10000];
+        in.read(bytes);
+
+        String o ="";
+//        for(byte b : bytes  ) {
+            o += new String(bytes);
+//        }
+
+        System.out.println("----------------");
+        System.out.println(o);
+        System.out.println("----------------");
+
         requestFromClient.setHeader(header);
         requestFromClient.setBody("");
 

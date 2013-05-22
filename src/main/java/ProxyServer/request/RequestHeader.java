@@ -1,6 +1,6 @@
 package ProxyServer.request;
 
-import ProxyServer.ProxyServer;
+
 import lombok.Data;
 import lombok.ToString;
 
@@ -25,5 +25,6 @@ public class RequestHeader {
     private String host;
     private String accept;
     private String proxyConnection;
+    private int contentLength;
 
 }

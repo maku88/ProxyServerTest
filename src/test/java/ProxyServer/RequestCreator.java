@@ -94,8 +94,13 @@ public class RequestCreator {
     }
 }
 
+
+    public static void main(String[] args) {
+        jerseyStyle();
+    }
+
     @Test
-    public void jerseyStyle() {
+    public static void jerseyStyle() {
         System.setProperty("http.proxySet", "true");
         System.setProperty("http.proxyHost", "localhost");
         System.setProperty("http.proxyPort", "10000");
@@ -116,7 +121,7 @@ public class RequestCreator {
             values.add("column", s);
         }
 
-
+        System.out.println("1");
         ClientResponse response = webResource.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, values);
 
 
@@ -146,8 +151,6 @@ public class RequestCreator {
             }
 
             String input = "login="+login+"&token="+token+"&dateFrom="+dateFrom+"&dateTo="+dateTo+colString;
-
-            System.out.println(input);
 
             OutputStream os = conn.getOutputStream();
             os.write(input.getBytes());
