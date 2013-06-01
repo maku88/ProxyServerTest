@@ -1,10 +1,14 @@
 package ProxyServer;
 
+import ProxyServer.cache.Cache;
 import ProxyServer.methods.GetRequest;
 import ProxyServer.methods.PostRequest;
 import ProxyServer.methods.IRequest;
+import ProxyServer.request.ReqestBody;
 import ProxyServer.request.Request;
 import ProxyServer.request.RequestHeader;
+import com.google.common.io.CharStreams;
+import com.sun.org.apache.xpath.internal.functions.FuncSystemProperty;
 import org.apache.commons.io.IOUtils;
 
 import java.net.*;
@@ -20,13 +24,19 @@ import java.util.*;
 public class ProxyThread extends Thread {
     private Socket socket = null;
     private static final int BUFFER_SIZE = 32768;
+    private Cache cache = Cache.getInstance();
+
     public ProxyThread(Socket socket) {
         super("ProxyThread");
         this.socket = socket;
     }
 
+
+
     public void run() {
         try {
+
+
 
             System.out.println("id : " +this.getId());
 
@@ -58,20 +68,22 @@ public class ProxyThread extends Thread {
 //                String output = response.getEntity(String.class);
 //                System.out.println(output);
 
-                IRequest requestHandelr;
+                String output = "";
+                if(requestFromClient.getHeader().getUrl().endsWith("/actions")) {
+                    String valueFromCache = cache.getCachedValue(requestFromClient.getBody().getTagID());
+                    System.out.println("GOT FROM CACHE " + valueFromCache);
 
-                switch (requestFromClient.getHeader().getMethod()) {
-                    case GET:
-                        requestHandelr = new GetRequest();
-                        break;
-                    case POST:
-                        requestHandelr = new PostRequest();
-                        break;
-                    default:
-                        requestHandelr = new GetRequest();
+                    if(valueFromCache == null ) {
+                        output = proceedRequest((requestFromClient));
+
+                        cache.addToCache(requestFromClient.getBody().getTagID(),output);
+
+                    }else {
+                        output = valueFromCache;
+                    }
+                }else {
+                    output = proceedRequest(requestFromClient);
                 }
-
-                String output = requestHandelr.makeRequest(requestFromClient);
 
                 // Start sending our reply, using the HTTP 1.1 protocol
                 out.print("HTTP/1.1 200 \r\n"); // Version & status code
@@ -103,15 +115,26 @@ public class ProxyThread extends Thread {
         }
     }
 
+    private String proceedRequest(Request requestFromClient) {
+        IRequest requestHandelr;
+        switch (requestFromClient.getHeader().getMethod()) {
+            case GET:
+                requestHandelr = new GetRequest();
+                break;
+            case POST:
+                requestHandelr = new PostRequest();
+                break;
+            default:
+                requestHandelr = new GetRequest();
+        }
+
+        return requestHandelr.makeRequest(requestFromClient);
+    }
+
 
     private Request readRequest(InputStream in) throws IOException {
         Request requestFromClient = new Request();
-        String inputLine = "", outputLine;
-        int cnt = 0;
-        String urlToCall = "";
         RequestHeader header =  new RequestHeader();
-
-
 
 //        System.out.println(new String(chars));
 //
@@ -160,23 +183,56 @@ public class ProxyThread extends Thread {
 //            cnt++;
 //        }
 
-        byte[] bytes = new byte[10000];
-        in.read(bytes);
+//        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+//        String line;
+//        while (!(line = br.readLine()).equals(""))
+//            System.out.println(line);
+//        br.close();
+//
 
-        String o ="";
-//        for(byte b : bytes  ) {
-            o += new String(bytes);
-//        }
 
-        System.out.println("----------------");
-        System.out.println(o);
-        System.out.println("----------------");
+            int br = 0;
+            String line = "";
+
+            while ((br = in.read())  != -1 ) {
+                line += (char) br;
+
+                String s = new String(new char[] {(char) br});
+                if(s.equals("}")) break;
+
+            }
+
+
+        String[] lines = line.split(System.getProperty("line.separator"));
+
+        int i = 0;
+        for(String singleLine : lines)  {
+            String[] tokens = singleLine.split(" ");
+            if (i == 0) {
+                header.setMethod(RequestHeader.Method.valueOf(tokens[0]));
+                header.setUrl(tokens[1]);
+                header.setHttpVersion(tokens[2]);
+            }else if(singleLine.contains(HttpRequestFields.ACCEPT.getField())) {
+                header.setAccept(tokens[1]);
+            }else if(singleLine.contains(HttpRequestFields.CONTENT_TYPE.getField())) {
+                header.setContentType(tokens[1]);
+            }else if(singleLine.contains(HttpRequestFields.CONTENT_LENGTH.getField())) {
+                header.setContentLength(Integer.parseInt(tokens[1]));
+            }else if(singleLine.contains(HttpRequestFields.HOST.getField())) {
+                header.setHost(tokens[1]);
+            }else if(singleLine.contains(HttpRequestFields.PROXY_CONNECTION.getField())) {
+                header.setProxyConnection(tokens[1]);
+            }else if(singleLine.equals("")) {
+
+            }else {
+               requestFromClient.setBody(new ReqestBody(tokens[0]));
+            }
+
+            i++;
+        }
 
         requestFromClient.setHeader(header);
-        requestFromClient.setBody("");
 
         return requestFromClient;
-
     }
-
 }

@@ -15,6 +15,6 @@ import lombok.ToString;
 public class Request {
 
     private RequestHeader header;
-    private String body;
+    private ReqestBody body;
 
 }

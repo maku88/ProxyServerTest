@@ -4,8 +4,19 @@ import ProxyServer.request.Request;
 import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.util.ParameterParser;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.entity.BasicHttpEntity;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -21,17 +32,40 @@ public class PostRequest implements IRequest {
     @Override
     public String makeRequest(Request request) {
         try {
-            PostMethod post = new PostMethod(request.getHeader().getUrl());
 
-            ParameterParser parameterParser = new ParameterParser();
+            HttpPost httpPost = null;
+            httpPost = new HttpPost(request.getHeader().getUrl());
+            StringEntity body = new StringEntity(request.getBody().getFullBody());
+            httpPost.setEntity(body);
+            httpPost.setHeader("Accept", request.getHeader().getAccept());
+            httpPost.setHeader("Content-type", request.getHeader().getContentType());
 
-            char[] separators = "&".toCharArray();
-            List<NameValuePair> nameValuePairList = parameterParser.parse(request.getBody(),separators[0]);
+            HttpParams httpParams = new BasicHttpParams();
+            HttpConnectionParams.setConnectionTimeout(httpParams, 5000);
+            DefaultHttpClient httpclient = new DefaultHttpClient(httpParams);
 
-            post.setRequestBody(nameValuePairList.toArray(new NameValuePair[nameValuePairList.size()]));
-            byte[] in = post.getResponseBody();
+            HttpResponse response;
 
-            return new String(in);
+
+            System.out.println("-----------------------------------------");
+            System.out.println("SENDING REQUEST : " + request.toString());
+
+            response = httpclient.execute(httpPost);
+
+            InputStream respone = response.getEntity().getContent();
+
+
+            int br = 0;
+            String line = "";
+
+            while ((br = respone.read())  != -1 ) {
+                line += (char) br;
+            }
+
+            System.out.println("RESPONSE : " + line);
+            System.out.println("-----------------------------------------");
+
+            return line;
 
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

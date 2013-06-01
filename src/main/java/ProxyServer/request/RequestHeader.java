@@ -15,6 +15,12 @@ import lombok.ToString;
 @ToString
 public class RequestHeader {
 
+    private String contentType;
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
     public enum Method {
         GET, POST, PUT, DELETE
     }
