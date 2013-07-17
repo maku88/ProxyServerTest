@@ -18,6 +18,8 @@ public class GetRequest implements IRequest {
 
     @Override
     public String makeRequest(Request request) {
+
+        System.out.println("MAKING GET REQUEST ");
         HttpClient client = new HttpClient();
         // Create a method instance.
         GetMethod method = new GetMethod(request.getHeader().getUrl());
