@@ -1,15 +1,12 @@
 package ProxyServer;
 
-import ProxyServer.cache.Cache;
+import ProxyServer.cache.cacheImplementations.Cache;
 import ProxyServer.methods.GetRequest;
 import ProxyServer.methods.PostRequest;
 import ProxyServer.methods.IRequest;
 import ProxyServer.request.ReqestBody;
 import ProxyServer.request.Request;
 import ProxyServer.request.RequestHeader;
-import com.google.common.io.CharStreams;
-import com.sun.org.apache.xpath.internal.functions.FuncSystemProperty;
-import org.apache.commons.io.IOUtils;
 
 import java.net.*;
 import java.io.*;
@@ -24,11 +21,12 @@ import java.util.*;
 public class ProxyThread extends Thread {
     private Socket socket = null;
     private static final int BUFFER_SIZE = 32768;
-    private Cache cache = Cache.getInstance();
+    private Cache cache;
 
-    public ProxyThread(Socket socket) {
+    public ProxyThread(Socket socket, Cache cacheImplemetation) {
         super("ProxyThread");
         this.socket = socket;
+        this.cache = cacheImplemetation;
     }
 
 

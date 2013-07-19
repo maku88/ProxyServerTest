@@ -175,7 +175,11 @@ public class RequestCreator {
             e.printStackTrace();
 
         }
+    }
 
+
+    @Test
+    public void testCache() {
 
     }
 

@@ -18,8 +18,10 @@ import java.util.Date;
 @AllArgsConstructor
 public class CachedObject {
 
-    private Date cacheDate;
+    private long cacheTimeStamp;
     private String response;
+    private long timeToLiveTimeStamp;
+
 
 
 }

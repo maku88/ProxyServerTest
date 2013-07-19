@@ -1,10 +1,9 @@
-package ProxyServer.cache.readCache;
+package ProxyServer.cache.cacheImplementations;
 
 import ProxyServer.cache.CachedObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,22 +23,22 @@ public class AskIfUpdatedPolicyTest {
     @Before
     public void before() {
 
-        cache.put(tagID,new CachedObject(new Date(),"aaa"));
+        cache.put(tagID,new CachedObject(new Date().getTime(),"aaa",0));
 
     }
 
     @Test
     public void testGetValueFromCache() throws Exception {
 
-        AskIfUpdatedPolicy policy = new AskIfUpdatedPolicy();
-
-        Date start = new Date();
-
-        System.out.println(policy.getValueFromCache(cache, tagID));
-
-        Date end = new Date();
-
-        System.out.println(end.getTime() - start.getTime());
+//        AskIfUpdatedPolicy policy = new AskIfUpdatedPolicy();
+//
+//        Date start = new Date();
+//
+//        System.out.println(policy.getValueFromCache(cache, tagID));
+//
+//        Date end = new Date();
+//
+//        System.out.println(end.getTime() - start.getTime());
 
     }
 }
