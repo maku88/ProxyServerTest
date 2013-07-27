@@ -8,6 +8,8 @@ import ProxyServer.request.Request;
 import ProxyServer.request.RequestHeader;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,23 +21,27 @@ import java.util.Date;
  *
  * Cache sprawdzający przy każdym odczycie czy zostały zmienione dane na znaczniku
  * jeżeli otrzyma od serwera odpowiedź 303 (NOT MODIFIED) to zwraca dane z cache jeżeli nie to zwraca to co otrzymał z serwera
- * chyba że dostał null wtedy zwraca też to co ma w cahce
+ * chyba że dostał null wtedy zwraca też to co ma w cache
  *
  */
-public class CFMCache extends BasicCache implements Cache{
+public class CFMCacheImpl implements Cache{
 
-    private static CFMCache instance ;
+    private Map<String, CachedObject> cache;
 
-    private CFMCache(){}
+    private static CFMCacheImpl instance ;
 
-    public static CFMCache getInstance(){
-        if(instance == null ) instance = new CFMCache();
+    private CFMCacheImpl(int capacity){
+        this.cache = new BasicCache<String, CachedObject>(capacity);
+    }
+
+    public static CFMCacheImpl getInstance(int capacity){
+        if(instance == null ) instance = new CFMCacheImpl(capacity);
         return instance;
     }
 
     public void addToCache(String tagID, String returnObject) {
         System.out.println("ADDING TO CACHE : " + tagID + " : " + returnObject);
-        this.getCache().put(tagID,new CachedObject(new Date().getTime(),returnObject,0));
+        this.cache.put(tagID,new CachedObject(new Date().getTime(),returnObject,SysConfig.timeToLiveParam));
 
     }
 
@@ -44,7 +50,7 @@ public class CFMCache extends BasicCache implements Cache{
 
         System.out.println("Getting from cache : " +tagID);
 
-        CachedObject cachedObject  = super.getCache().get(tagID);
+        CachedObject cachedObject  = this.cache.get(tagID);
 
         if(cachedObject == null ) return null;
 

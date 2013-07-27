@@ -4,6 +4,8 @@ import ProxyServer.cache.CachedObject;
 import ProxyServer.config.SysConfig;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,21 +14,24 @@ import java.util.Date;
  * Time: 23:16
  * To change this template use File | Settings | File Templates.
  */
-public class TTLCache extends BasicCache implements Cache {
+public class TTLCacheImpl implements Cache {
 
-    private static TTLCache instance ;
+    private Map<String, CachedObject> cache;
+    private static TTLCacheImpl instance ;
 
-    private TTLCache(){}
+    private TTLCacheImpl(int capacity){
+        this.cache = new BasicCache<String, CachedObject>(capacity);
+    }
 
-    public static TTLCache getInstance(){
-        if(instance == null ) instance = new TTLCache();
+    public static TTLCacheImpl getInstance(int capacity){
+        if(instance == null ) instance = new TTLCacheImpl(capacity);
         return instance;
     }
 
 
     public void addToCache(String tagID, String returnObject) {
         System.out.println("ADDING TO CACHE : " + tagID + " : " + returnObject);
-        this.getCache().put(tagID, new CachedObject(new Date().getTime(), returnObject, new Date().getTime() + SysConfig.timeToLiveParam));
+        this.cache.put(tagID, new CachedObject(new Date().getTime(), returnObject, new Date().getTime() + SysConfig.timeToLiveParam));
 
     }
 
@@ -35,7 +40,7 @@ public class TTLCache extends BasicCache implements Cache {
 
         System.out.println("Getting from cache : " +tagID);
 
-        CachedObject cachedObject  = super.getCache().get(tagID);
+        CachedObject cachedObject  = this.cache.get(tagID);
 
         String response;
 

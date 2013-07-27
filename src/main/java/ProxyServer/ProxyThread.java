@@ -33,9 +33,6 @@ public class ProxyThread extends Thread {
 
     public void run() {
         try {
-
-
-
             System.out.println("id : " +this.getId());
 
             Map<String, String> headerMap = new HashMap<String, String>();

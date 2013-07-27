@@ -7,7 +7,7 @@ package ProxyServer.cache.cacheImplementations;
  * Time: 23:17
  * To change this template use File | Settings | File Templates.
  */
-public class LFUCache extends BasicCache implements Cache {
+public class LFUCache implements Cache {
     @Override
     public void addToCache(String tagID, String returnObject) {
         //To change body of implemented methods use File | Settings | File Templates.

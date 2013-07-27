@@ -15,13 +15,16 @@ import java.util.Date;
  */
 @Data
 @ToString
-@AllArgsConstructor
 public class CachedObject {
 
     private long cacheTimeStamp;
     private String response;
     private long timeToLiveTimeStamp;
 
-
+    public CachedObject(long cacheTimeStamp,String response, long timeToLive) {
+        this.response = response;
+        this.cacheTimeStamp = cacheTimeStamp;
+        this.timeToLiveTimeStamp = new Date().getTime()+timeToLive;
+    }
 
 }

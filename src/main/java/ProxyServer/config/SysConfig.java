@@ -12,4 +12,10 @@ public class SysConfig {
     public static final String serverHost = "http://localhost:8080";
 
     public static long timeToLiveParam = 100;
+    public static int CacheSize = 10;
+
+    public static void setCacheSize(int size) {
+        CacheSize = size;
+    }
+
 }
