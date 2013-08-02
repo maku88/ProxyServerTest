@@ -2,6 +2,7 @@ package ProxyServer.cache.cacheImplementations;
 
 import ProxyServer.cache.CachedObject;
 import ProxyServer.config.SysConfig;
+import org.apache.log4j.Logger;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -33,6 +34,7 @@ public class LRUCacheImpl implements Cache {
 
     private Map<String, CachedObject> cache ;
     private static LRUCacheImpl instance ;
+    private Logger log = Logger.getLogger("LRU");
 
     private LRUCacheImpl(int capacity){
         this.cache = new LRUCache<String, CachedObject>(capacity);
@@ -45,8 +47,9 @@ public class LRUCacheImpl implements Cache {
 
     @Override
     public void addToCache(String tagID, String returnObject) {
-        System.out.println("ADDING TO CACHE : " + tagID + " : " + returnObject);
+        log.info("ADDING : " + tagID + " : " + returnObject);
         this.cache.put(tagID, new CachedObject(new Date().getTime(), returnObject, SysConfig.timeToLiveParam));
+        log.info("CACHE SIZE : " + this.cache.size());
     }
 
     @Override
@@ -58,7 +61,7 @@ public class LRUCacheImpl implements Cache {
 
     public void printCache() {
         for(Map.Entry<String , CachedObject> entry : this.cache.entrySet()) {
-            System.out.println(entry.getKey() + " " + entry.getValue());
+            log.info(entry.getKey() + " " + entry.getValue());
         }
     }
 

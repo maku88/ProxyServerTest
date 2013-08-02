@@ -6,6 +6,7 @@ import ProxyServer.config.SysConfig;
 import ProxyServer.methods.GetRequest;
 import ProxyServer.request.Request;
 import ProxyServer.request.RequestHeader;
+import org.apache.log4j.Logger;
 
 import java.util.Date;
 import java.util.Map;
@@ -27,8 +28,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CFMCacheImpl implements Cache{
 
     private Map<String, CachedObject> cache;
-
     private static CFMCacheImpl instance ;
+    private Logger log = Logger.getLogger("CFM");
+
 
     private CFMCacheImpl(int capacity){
         this.cache = new BasicCache<String, CachedObject>(capacity);
@@ -40,15 +42,16 @@ public class CFMCacheImpl implements Cache{
     }
 
     public void addToCache(String tagID, String returnObject) {
-        System.out.println("ADDING TO CACHE : " + tagID + " : " + returnObject);
+        log.info("ADDING : " + tagID + " : " + returnObject);
         this.cache.put(tagID,new CachedObject(new Date().getTime(),returnObject,SysConfig.timeToLiveParam));
+        log.info("CACHE SIZE : " + this.cache.size());
 
     }
 
 
     public String getCachedValue(String tagID) {
 
-        System.out.println("Getting from cache : " +tagID);
+        log.info("Getting from cache : " +tagID);
 
         CachedObject cachedObject  = this.cache.get(tagID);
 
@@ -67,7 +70,7 @@ public class CFMCacheImpl implements Cache{
     private String checkForModification(String tagID, long timestamp) {
         Request req = new Request();
 
-        System.out.println("Checking for modification " + tagID + " " + timestamp);
+        log.info("Checking for modification " + tagID + " " + timestamp);
 
         RequestHeader header = new RequestHeader();
         header.setUrl(SysConfig.serverHost+"/rest/cache/tag/"+tagID +"/"+timestamp);
@@ -77,7 +80,7 @@ public class CFMCacheImpl implements Cache{
         GetRequest get = new GetRequest();
         String s = get.makeRequest(req);
 
-        System.out.println("Checking for modification result " + s);
+        log.info("Checking for modification result " + s);
 
         return s;
 

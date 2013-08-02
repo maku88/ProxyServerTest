@@ -7,6 +7,9 @@ import ProxyServer.methods.IRequest;
 import ProxyServer.request.ReqestBody;
 import ProxyServer.request.Request;
 import ProxyServer.request.RequestHeader;
+import ProxyServer.stats.RequestStats;
+import ProxyServer.stats.StatsCollector;
+import org.apache.log4j.Logger;
 
 import java.net.*;
 import java.io.*;
@@ -22,18 +25,21 @@ public class ProxyThread extends Thread {
     private Socket socket = null;
     private static final int BUFFER_SIZE = 32768;
     private Cache cache;
+    private StatsCollector statsCollector;
+    private Logger log = Logger.getLogger(ProxyThread.class);
 
-    public ProxyThread(Socket socket, Cache cacheImplemetation) {
+    public ProxyThread(Socket socket, Cache cacheImplemetation,StatsCollector statsCollector) {
         super("ProxyThread");
         this.socket = socket;
         this.cache = cacheImplemetation;
+        this.statsCollector = statsCollector;
     }
 
 
 
     public void run() {
         try {
-            System.out.println("id : " +this.getId());
+            log.info("id : " +this.getId());
 
             Map<String, String> headerMap = new HashMap<String, String>();
             PrintWriter out = new PrintWriter(socket.getOutputStream());
@@ -45,13 +51,13 @@ public class ProxyThread extends Thread {
 
 //            Header[] header = HttpParser.parseHeaders(socket.getInputStream(),"UTF-8");
 //            for(Header h : header ) {
-//                System.out.println(h.getName() + " : " + h.getValue());
+//                log.info(h.getName() + " : " + h.getValue());
 //            }
 
 
 
             Request requestFromClient = readRequest(in);
-            System.out.println("REQUEST FROM CLIENT : " + requestFromClient.toString());
+            log.info("REQUEST FROM CLIENT : " + requestFromClient.toString());
             try {
                 //begin send request to server, get response from server
 //                ClientConfig config = new DefaultClientConfig();
@@ -59,23 +65,39 @@ public class ProxyThread extends Thread {
 //                WebResource webResource = client.resource(urlToCall);
 //
 //                ClientResponse response = webResource.get(ClientResponse.class);
-//                System.out.println("Output from Server .... \n");
+//                log.info("Output from Server .... \n");
 //                String output = response.getEntity(String.class);
-//                System.out.println(output);
+//                log.info(output);
 
                 String output = "";
+
                 if(requestFromClient.getHeader().getUrl().endsWith("/actions")) {
+                    long start = new Date().getTime();
+                    RequestStats stats = new RequestStats();
                     String valueFromCache = cache.getCachedValue(requestFromClient.getBody().getTagID());
-                    System.out.println("GOT FROM CACHE " + valueFromCache);
+                    log.info("GOT FROM CACHE " + valueFromCache);
 
                     if(valueFromCache == null ) {
-                        output = proceedRequest((requestFromClient));
+                        output = proceedRequest(requestFromClient);
 
                         cache.addToCache(requestFromClient.getBody().getTagID(),output);
 
+                        stats.setResponseType(RequestStats.ResponseType.SERVER);
                     }else {
                         output = valueFromCache;
+                        stats.setResponseType(RequestStats.ResponseType.CACHE);
                     }
+
+                    long end = new Date().getTime();
+
+                    stats.setResponse(output);
+                    stats.setStartTimestamp(start);
+                    stats.setEndTimestamp(end);
+                    stats.setDuration(end-start);
+                    stats.setTagID(requestFromClient.getBody().getTagID());
+                    stats.setCacheType(cache.getClass().getName());
+
+                    statsCollector.addStats(stats);
                 }else {
                     output = proceedRequest(requestFromClient);
                 }
@@ -87,7 +109,10 @@ public class ProxyThread extends Thread {
                 out.print("\r\n"); // End of headers
                 out.write(output);
 
+
                 out.close(); // Flush and close the output stream
+
+
 
             } catch (Exception e) {
                 System.err.println("Encountered exception: " + e);
@@ -131,7 +156,7 @@ public class ProxyThread extends Thread {
         Request requestFromClient = new Request();
         RequestHeader header =  new RequestHeader();
 
-//        System.out.println(new String(chars));
+//        log.info(new String(chars));
 //
 //        byte[] buffer = new byte[8192];
 //        ByteArrayOutputStream output = new ByteArrayOutputStream();
@@ -141,7 +166,7 @@ public class ProxyThread extends Thread {
 //            output.write(buffer, 0, bytesRead);
 //        }
 //
-//        System.out.println(output.toString());
+//        log.info(output.toString());
 
 //        BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 //        while (((inputLine = input.readLine()) != null) && (!(inputLine.equals("")))) {
@@ -152,14 +177,14 @@ public class ProxyThread extends Thread {
 //                break;
 //            }
 //
-//            System.out.println(inputLine);
+//            log.info(inputLine);
 //            parse the first line of the request to find the url
 //            String[] tokens = inputLine.split(" ");
 //            if (cnt == 0) {
 //
 //                urlToCall = tokens[1];
 //                can redirect this to output log
-//                System.out.println("IRequest for : " + urlToCall);
+//                log.info("IRequest for : " + urlToCall);
 //                header.setMethod(RequestHeader.Method.valueOf(tokens[0]));
 //                header.setUrl(tokens[1]);
 //                header.setHttpVersion(tokens[2]);
@@ -181,7 +206,7 @@ public class ProxyThread extends Thread {
 //        BufferedReader br = new BufferedReader(new InputStreamReader(in));
 //        String line;
 //        while (!(line = br.readLine()).equals(""))
-//            System.out.println(line);
+//            log.info(line);
 //        br.close();
 //
 

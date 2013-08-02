@@ -2,6 +2,7 @@ package ProxyServer.cache.cacheImplementations;
 
 import ProxyServer.cache.CachedObject;
 import ProxyServer.config.SysConfig;
+import org.apache.log4j.Logger;
 
 import java.util.Date;
 import java.util.Map;
@@ -18,6 +19,7 @@ public class TTLCacheImpl implements Cache {
 
     private Map<String, CachedObject> cache;
     private static TTLCacheImpl instance ;
+    private Logger log = Logger.getLogger("TTL");
 
     private TTLCacheImpl(int capacity){
         this.cache = new BasicCache<String, CachedObject>(capacity);
@@ -30,15 +32,15 @@ public class TTLCacheImpl implements Cache {
 
 
     public void addToCache(String tagID, String returnObject) {
-        System.out.println("ADDING TO CACHE : " + tagID + " : " + returnObject);
+        log.info("ADDING : " + tagID + " : " + returnObject);
         this.cache.put(tagID, new CachedObject(new Date().getTime(), returnObject, new Date().getTime() + SysConfig.timeToLiveParam));
-
+        log.info("CACHE SIZE : " + this.cache.size());
     }
 
     @Override
     public String getCachedValue(String tagID) {
 
-        System.out.println("Getting from cache : " +tagID);
+        log.info("Getting from cache : " +tagID);
 
         CachedObject cachedObject  = this.cache.get(tagID);
 
@@ -53,7 +55,7 @@ public class TTLCacheImpl implements Cache {
             response = null;
         }
 
-        System.out.println("response from ttl cache : " + response);
+        log.info("response from ttl cache : " + response);
 
         return response;
     }

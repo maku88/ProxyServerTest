@@ -1,5 +1,7 @@
 package ProxyServer.cache.cacheImplementations;
 
+import org.apache.log4j.Logger;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Maciek
@@ -10,6 +12,7 @@ package ProxyServer.cache.cacheImplementations;
 public class FakeCache implements Cache {
 
     private static FakeCache instance ;
+    private Logger log = Logger.getLogger("FAKE");
 
     private FakeCache(int capacity){}
 
