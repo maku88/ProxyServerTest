@@ -11,4 +11,6 @@ public interface Cache  {
 
      void addToCache(String tagID, String returnObject);
      String getCachedValue(String tagID);
+        void clear();
+
 }

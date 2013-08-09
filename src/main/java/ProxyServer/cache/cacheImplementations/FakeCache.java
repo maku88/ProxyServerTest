@@ -31,4 +31,8 @@ public class FakeCache implements Cache {
     public String getCachedValue(String tagID) {
         return "{\"condition\":null,\"trueActionGroup\":[{\"id\":0,\"mActionType\":\"URL\",\"mActionParams\":{\"application\":\"WWW\",\"dataType\":\"text/html\",\"url\":\"http://wp.pl\"}}],\"falseActionGroup\":null,\"nextTrue\":null,\"nextFalse\":null}";
     }
+
+    public void clear() {
+
+    }
 }

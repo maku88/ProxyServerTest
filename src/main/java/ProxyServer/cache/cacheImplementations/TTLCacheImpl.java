@@ -60,11 +60,9 @@ public class TTLCacheImpl implements Cache {
         return response;
     }
 
-
-
-
-
-
+    public void clear() {
+        cache.clear();
+    }
 
 
 }

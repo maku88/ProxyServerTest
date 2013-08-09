@@ -86,4 +86,8 @@ public class CFMCacheImpl implements Cache{
 
     }
 
+    public void clear() {
+        cache.clear();
+    }
+
 }

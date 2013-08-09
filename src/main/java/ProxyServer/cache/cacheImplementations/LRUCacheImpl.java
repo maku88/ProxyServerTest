@@ -64,5 +64,8 @@ public class LRUCacheImpl implements Cache {
             log.info(entry.getKey() + " " + entry.getValue());
         }
     }
+    public void clear() {
+        cache.clear();
+    }
 
 }

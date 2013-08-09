@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.ToString;
 import org.junit.Before;
 import org.junit.Test;
-import org.uncommons.maths.random.GaussianGenerator;
 
 import java.math.BigDecimal;
 import java.util.*;

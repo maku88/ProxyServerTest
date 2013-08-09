@@ -4,18 +4,32 @@ import ProxyServer.cache.cacheImplementations.*;
 import ProxyServer.config.SysConfig;
 import ProxyServer.stats.StatsCollector;
 import org.apache.log4j.Logger;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.net.*;
 import java.io.*;
 
-public class ProxyServer {
+@Component
+public class ProxyServer implements RemoteProxyServer {
+
+    private Cache cacheImpl;
+
     public static void main(String[] args) throws IOException {
+
+        ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+
+        ProxyServer p = context.getBean(ProxyServer.class);
+        p.startProxy(args);
+
+    }
+
+    private void startProxy(String[] args) throws IOException {
         Logger log = Logger.getLogger(ProxyServer.class);
         ServerSocket serverSocket = null;
         boolean listening = true;
         StatsCollector statsCollector = new StatsCollector();
-
-        Cache cacheImpl = null;
 
         SysConfig.setServerHost(args[1]);
         SysConfig.setCacheSize(Integer.parseInt(args[2]));
@@ -49,6 +63,8 @@ public class ProxyServer {
         serverSocket.close();
     }
 
-
-
+    public void clearCache() {
+        System.out.println("CLEAR CACHE MESSAGE");
+        cacheImpl.clear();
+    }
 }
