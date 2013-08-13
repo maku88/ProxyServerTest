@@ -28,18 +28,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CFMCacheImpl implements Cache{
 
     private Map<String, CachedObject> cache;
-    private static CFMCacheImpl instance ;
     private Logger log = Logger.getLogger("CFM");
 
 
-    private CFMCacheImpl(int capacity){
+    public CFMCacheImpl(int capacity){
         this.cache = new BasicCache<String, CachedObject>(capacity);
     }
 
-    public static CFMCacheImpl getInstance(int capacity){
-        if(instance == null ) instance = new CFMCacheImpl(capacity);
-        return instance;
-    }
 
     public void addToCache(String tagID, String returnObject) {
         log.info("ADDING : " + tagID + " : " + returnObject);

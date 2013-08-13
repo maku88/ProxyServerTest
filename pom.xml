@@ -14,6 +14,37 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ejb-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <ejbVersion>3.0</ejbVersion>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                    </archive>
+                    <generateClient>true</generateClient>
+                    <clientExcludes>
+                        <!-- this will exclude all files under com/example -->
+                        <clientExclude>ProxyServer/cache/**</clientExclude>
+                        <clientExclude>applicationContext.xml</clientExclude>
+                    </clientExcludes>
+                    <clientIncludes>
+                        <clientInclude>ProxyServer/RemoteProxyServer.class</clientInclude>
+                        <clientInclude>ProxyServer/stats/RequestStats.class</clientInclude>
+                        <clientInclude>ProxyServer/stats/ResponseType.class</clientInclude>
+                    </clientIncludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+
   <dependencies>
       <dependency>
           <groupId>junit</groupId>

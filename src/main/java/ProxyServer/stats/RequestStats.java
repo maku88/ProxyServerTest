@@ -1,7 +1,8 @@
 package ProxyServer.stats;
 
 import lombok.Data;
-import lombok.ToString;
+
+import java.io.Serializable;
 
 /**
  * Created with IntelliJ IDEA.
@@ -11,18 +12,14 @@ import lombok.ToString;
  * To change this template use File | Settings | File Templates.
  */
 @Data
-public class RequestStats {
+public class RequestStats implements Serializable {
 
     @Override
     public String toString() {
-        return cacheType + ";" + responseType +";" + tagID + ";" + startTimestamp + ";" + endTimestamp + ";" + duration + ";" + response ;
+        return simulationID + ";" + cacheType + ";" + responseType +";" + tagID + ";" + startTimestamp + ";" + endTimestamp + ";" + duration + ";" + response ;
     }
 
-    public enum ResponseType {
-        SERVER,
-        CACHE
-    }
-
+    private int simulationID;
     private String cacheType;
     private ResponseType responseType;
     private String tagID;

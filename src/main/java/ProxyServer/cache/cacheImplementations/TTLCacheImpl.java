@@ -18,22 +18,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TTLCacheImpl implements Cache {
 
     private Map<String, CachedObject> cache;
-    private static TTLCacheImpl instance ;
     private Logger log = Logger.getLogger("TTL");
+    private int ttl;
 
-    private TTLCacheImpl(int capacity){
+    public TTLCacheImpl(int capacity, int ttl){
         this.cache = new BasicCache<String, CachedObject>(capacity);
+        this.ttl = ttl;
     }
-
-    public static TTLCacheImpl getInstance(int capacity){
-        if(instance == null ) instance = new TTLCacheImpl(capacity);
-        return instance;
-    }
-
 
     public void addToCache(String tagID, String returnObject) {
         log.info("ADDING : " + tagID + " : " + returnObject);
-        this.cache.put(tagID, new CachedObject(new Date().getTime(), returnObject, new Date().getTime() + SysConfig.timeToLiveParam));
+        this.cache.put(tagID, new CachedObject(new Date().getTime(), returnObject, new Date().getTime() + ttl));
         log.info("CACHE SIZE : " + this.cache.size());
     }
 

@@ -33,17 +33,12 @@ public class LRUCacheImpl implements Cache {
     }
 
     private Map<String, CachedObject> cache ;
-    private static LRUCacheImpl instance ;
     private Logger log = Logger.getLogger("LRU");
 
-    private LRUCacheImpl(int capacity){
+    public LRUCacheImpl(int capacity){
         this.cache = new LRUCache<String, CachedObject>(capacity);
     }
 
-    public static LRUCacheImpl getInstance(int capacity){
-        if(instance == null ) instance = new LRUCacheImpl(capacity);
-        return instance;
-    }
 
     @Override
     public void addToCache(String tagID, String returnObject) {

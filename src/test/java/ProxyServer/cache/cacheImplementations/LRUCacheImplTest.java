@@ -24,7 +24,7 @@ public class LRUCacheImplTest {
     @Before
     public void initCache() {
         SysConfig.setCacheSize(3);
-        this.cache = LRUCacheImpl.getInstance(SysConfig.CacheSize);
+        this.cache =new  LRUCacheImpl(SysConfig.CacheSize);
     }
 
     @Test

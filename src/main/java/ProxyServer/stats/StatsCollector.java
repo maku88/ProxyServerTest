@@ -24,4 +24,7 @@ public class StatsCollector {
         simulationResults.add(stats);
     }
 
+    public List<RequestStats> getSimulationResults() {
+        return simulationResults;
+    }
 }

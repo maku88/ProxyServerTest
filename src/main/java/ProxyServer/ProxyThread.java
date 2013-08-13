@@ -8,6 +8,7 @@ import ProxyServer.request.ReqestBody;
 import ProxyServer.request.Request;
 import ProxyServer.request.RequestHeader;
 import ProxyServer.stats.RequestStats;
+import ProxyServer.stats.ResponseType;
 import ProxyServer.stats.StatsCollector;
 import org.apache.log4j.Logger;
 
@@ -27,12 +28,14 @@ public class ProxyThread extends Thread {
     private Cache cache;
     private StatsCollector statsCollector;
     private Logger log = Logger.getLogger(ProxyThread.class);
+    private int simulationID;
 
-    public ProxyThread(Socket socket, Cache cacheImplemetation,StatsCollector statsCollector) {
+    public ProxyThread(Socket socket, Cache cacheImplemetation,StatsCollector statsCollector, int simulationID) {
         super("ProxyThread");
         this.socket = socket;
         this.cache = cacheImplemetation;
         this.statsCollector = statsCollector;
+        this.simulationID = simulationID;
     }
 
 
@@ -82,10 +85,10 @@ public class ProxyThread extends Thread {
 
                         cache.addToCache(requestFromClient.getBody().getTagID(),output);
 
-                        stats.setResponseType(RequestStats.ResponseType.SERVER);
+                        stats.setResponseType(ResponseType.SERVER);
                     }else {
                         output = valueFromCache;
-                        stats.setResponseType(RequestStats.ResponseType.CACHE);
+                        stats.setResponseType(ResponseType.CACHE);
                     }
 
                     long end = new Date().getTime();
@@ -96,6 +99,7 @@ public class ProxyThread extends Thread {
                     stats.setDuration(end-start);
                     stats.setTagID(requestFromClient.getBody().getTagID());
                     stats.setCacheType(cache.getClass().getName());
+                    stats.setSimulationID(simulationID);
 
                     statsCollector.addStats(stats);
                 }else {

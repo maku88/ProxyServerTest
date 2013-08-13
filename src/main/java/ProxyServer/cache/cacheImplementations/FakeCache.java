@@ -11,15 +11,12 @@ import org.apache.log4j.Logger;
  */
 public class FakeCache implements Cache {
 
-    private static FakeCache instance ;
+
     private Logger log = Logger.getLogger("FAKE");
 
-    private FakeCache(int capacity){}
+    public FakeCache(int capacity){}
 
-    public static FakeCache getInstance(int capacity){
-        if(instance == null ) instance = new FakeCache(capacity);
-        return instance;
-    }
+
 
 
     @Override

@@ -2,6 +2,7 @@ package ProxyServer;
 
 import ProxyServer.cache.cacheImplementations.*;
 import ProxyServer.config.SysConfig;
+import ProxyServer.stats.RequestStats;
 import ProxyServer.stats.StatsCollector;
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -10,11 +11,17 @@ import org.springframework.stereotype.Component;
 
 import java.net.*;
 import java.io.*;
+import java.util.List;
 
 @Component
 public class ProxyServer implements RemoteProxyServer {
 
     private Cache cacheImpl;
+    Logger log = Logger.getLogger(ProxyServer.class);
+    private boolean proxyListeningFlag = true;
+    private ServerSocket serverSocket = null;
+    private StatsCollector statsCollector = new StatsCollector();
+    private int simulationID;
 
     public static void main(String[] args) throws IOException {
 
@@ -26,45 +33,62 @@ public class ProxyServer implements RemoteProxyServer {
     }
 
     private void startProxy(String[] args) throws IOException {
-        Logger log = Logger.getLogger(ProxyServer.class);
-        ServerSocket serverSocket = null;
-        boolean listening = true;
-        StatsCollector statsCollector = new StatsCollector();
-
-        SysConfig.setServerHost(args[1]);
-        SysConfig.setCacheSize(Integer.parseInt(args[2]));
-        SysConfig.setPort(Integer.parseInt(args[3]));
-        SysConfig.setTimeToLiveParam(Integer.parseInt(args[4]));
 
 
-        if(args[0].equals("FAKE")) cacheImpl = FakeCache.getInstance(SysConfig.CacheSize);
-        else if(args[0].equals("TTL")) cacheImpl = TTLCacheImpl.getInstance(SysConfig.CacheSize);
-        else if(args[0].equals("LRU")) cacheImpl = LRUCacheImpl.getInstance(SysConfig.CacheSize);
-        else if(args[0].equals("CFM")) cacheImpl = CFMCacheImpl.getInstance(SysConfig.CacheSize);
+        SysConfig.setServerHost(args[0]);
+        SysConfig.setPort(Integer.parseInt(args[1]));
+
+        serverSocket = new ServerSocket(SysConfig.port);
+        log.info("------------------");
+        log.info("PROXY SERVER START");
+
+        log.info("OrginServer : " + SysConfig.serverHost);
+        log.info("WAITING FOR SETUP MESSAGE");
+        start();
+    }
 
 
+    private void start() {
         try {
-            serverSocket = new ServerSocket(SysConfig.port);
-            log.info("------------------");
-            log.info("PROXY SERVER START");
+            log.info("START");
             log.info("Started on: " + serverSocket.getInetAddress().getHostAddress() + ":"+ SysConfig.port);
-            log.info("Cache : " + cacheImpl.getClass().getSimpleName());
-            log.info("OrginServer : " + SysConfig.serverHost);
-            log.info("TTL : " + SysConfig.timeToLiveParam);
-            log.info("CacheSize : " + SysConfig.CacheSize);
+            //TODO zbieranie statystyk
+
+            while (proxyListeningFlag) {
+                new ProxyThread(serverSocket.accept(),cacheImpl,statsCollector, simulationID).start();
+            }
+            serverSocket.close();
         } catch (IOException e) {
             log.error("Could not listen on port: " + SysConfig.port);
             System.exit(-1);
         }
-
-        while (listening) {
-            new ProxyThread(serverSocket.accept(),cacheImpl,statsCollector).start();
-        }
-        serverSocket.close();
     }
 
-    public void clearCache() {
-        System.out.println("CLEAR CACHE MESSAGE");
-        cacheImpl.clear();
+
+    public void reloadCache(String cacheType, int ttl, int capacity, int simulationID) {
+            log.info(">> SETUP MESSAGE <<");
+            proxyListeningFlag =false;
+            cacheImpl = getCorrectCache(cacheType,capacity,ttl);
+            this.simulationID = simulationID;
+
+            log.info("Cache : " + cacheImpl.getClass().getSimpleName());
+            log.info("TTL : " + ttl);
+            log.info("CacheSize : " + capacity);
+            log.info("SimulationID : " + simulationID);
+
+            proxyListeningFlag=true;
     }
+
+    private Cache getCorrectCache(String cacheType, int cacheSize, int ttl) {
+        if(cacheType.equals("FAKE")) return new FakeCache(cacheSize);
+        else if(cacheType.equals("TTL")) return  new TTLCacheImpl(cacheSize,ttl);
+        else if(cacheType.equals("LRU")) return  new LRUCacheImpl(cacheSize);
+        else if(cacheType.equals("CFM")) return  new CFMCacheImpl(cacheSize);
+        else return null;
+    }
+
+    public List<RequestStats> getStats() {
+        return statsCollector.getSimulationResults();
+    }
+
 }

@@ -1,5 +1,9 @@
 package ProxyServer;
 
+import ProxyServer.stats.RequestStats;
+
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Maciek
@@ -9,6 +13,7 @@ package ProxyServer;
  */
 public interface RemoteProxyServer {
 
-    public void clearCache() ;
+    public void reloadCache(String cacehType, int ttl,int capacity, int simulationID) ;
 
+    public List<RequestStats> getStats();
 }
