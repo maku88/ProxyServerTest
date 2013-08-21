@@ -136,6 +136,7 @@ public class ProxyThread extends Thread {
 
         } catch (IOException e) {
             e.printStackTrace();
+            log.error(e.getStackTrace());
         }
     }
 
@@ -241,7 +242,13 @@ public class ProxyThread extends Thread {
             }else if(singleLine.contains(HttpRequestFields.CONTENT_TYPE.getField())) {
                 header.setContentType(tokens[1]);
             }else if(singleLine.contains(HttpRequestFields.CONTENT_LENGTH.getField())) {
-                header.setContentLength(Integer.parseInt(tokens[1]));
+
+
+
+
+                log.info("!!!!!!!!!!!!" + tokens[1]+"!!!!!!!!!!");
+
+                header.setContentLength(Integer.parseInt(tokens[1].trim()));
             }else if(singleLine.contains(HttpRequestFields.HOST.getField())) {
                 header.setHost(tokens[1]);
             }else if(singleLine.contains(HttpRequestFields.PROXY_CONNECTION.getField())) {
