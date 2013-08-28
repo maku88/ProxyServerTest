@@ -24,7 +24,7 @@ public class CachedObject {
     public CachedObject(long cacheTimeStamp,String response, long timeToLive) {
         this.response = response;
         this.cacheTimeStamp = cacheTimeStamp;
-        this.timeToLiveTimeStamp = new Date().getTime()+timeToLive;
+        this.timeToLiveTimeStamp = timeToLive;
     }
 
 }

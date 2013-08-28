@@ -19,16 +19,18 @@ public class TTLCacheImpl implements Cache {
 
     private Map<String, CachedObject> cache;
     private Logger log = Logger.getLogger("TTL");
-    private int ttl;
+    private long ttl;
 
-    public TTLCacheImpl(int capacity, int ttl){
+    public TTLCacheImpl(int capacity, long ttl){
+        System.out.println("TTL init");
         this.cache = new BasicCache<String, CachedObject>(capacity);
         this.ttl = ttl;
     }
 
     public void addToCache(String tagID, String returnObject) {
         log.info("ADDING : " + tagID + " : " + returnObject);
-        this.cache.put(tagID, new CachedObject(new Date().getTime(), returnObject, new Date().getTime() + ttl));
+        long timestamp = new Date().getTime();
+        this.cache.put(tagID, new CachedObject(timestamp, returnObject, timestamp + ttl));
         log.info("CACHE SIZE : " + this.cache.size());
     }
 
@@ -55,6 +57,12 @@ public class TTLCacheImpl implements Cache {
         return response;
     }
 
+
+    public void printCache() {
+        for(Map.Entry<String , CachedObject> entry : this.cache.entrySet()) {
+            log.info(entry.getKey() + " " + entry.getValue());
+        }
+    }
     public void clear() {
         cache.clear();
     }
